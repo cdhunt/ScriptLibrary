@@ -74,3 +74,11 @@ foreach ($s in $series.keys.GetEnumerator())
         $_
     }
 }
+
+# Get by Episode ID
+# .\Invoke-GenericMethod.ps1 $db Get Episode 4808568
+
+# Gets all objects that contain an Id field
+#. C:\Scripts\Invoke-GenericMethod.ps1 $db ListByName Episode Id
+
+$db.Dispose()
