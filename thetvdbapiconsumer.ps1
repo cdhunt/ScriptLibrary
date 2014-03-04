@@ -1,3 +1,21 @@
+# http://www.orthogonal.com.au/computers/simpledb/
+Add-Type -Path C:\Scripts\Modules\SimpleDb\SimpleDb.Esent.dll
+
+$episodeClass = @"
+using System;
+public class Episode
+{
+    public string Series { get; set; }
+    public int Id { get; set; }
+    public int SeriesId { get; set; }    
+    public DateTime? FirstAired { get; set; }
+    public int? SeasonNumber { get; set; }
+    public string EpisodeName { get; set; }
+    public int? PreviousTime { get; set; }
+}
+"@
+Add-Type -TypeDefinition $episodeClass -Language CSharp
+
 # http://thetvdb.com/wiki/index.php?title=Programmers_API
 $apikey = '123'
 
@@ -26,15 +44,33 @@ $series = [ordered]@{
     "Revolution" = 258823
 }
 
+$db = New-Object SimpleDb.SimpleDatabase('C:\temp\simpledb')
+
 foreach ($s in $series.keys.GetEnumerator())
 {
     try
     {
         $episodes = irm "$mirrorpath/api/$apikey/series/$($series[$s])/all/$($english.abbreviation).xml" | select -expandproperty Data
-        $episodes.Episode | select @{l="Series";e={$s}}, @{l="FirstAired";e={Get-Date $_.FirstAired}}, SeasonNumber, EpisodeName | Write-Output
+        #$episodes.Episode | select @{l="Series";e={$s}}, @{l="FirstAired";e={Get-Date $_.FirstAired}}, SeasonNumber, EpisodeName | Write-Output
+        foreach ($e in $episodes.Episode)
+        {
+            $episodeObject = New-Object Episode
+            $episodeObject.Series = $s
+            $episodeObject.Id = $e.id
+            $episodeObject.SeriesId = $series[$s]
+            try {$episodeObject.FirstAired = Get-Date $e.FirstAired} catch {$null}
+            $episodeObject.SeasonNumber = $e.SeasonNumber
+            $episodeObject.EpisodeName = $e.EpisodeName
+            $episodeObject.PreviousTime = $currenttime.Items.Time
+
+            $episodeObject | Write-Output
+            # True if the key already existed. False if a new key was inserted.
+            $newKey = $db.Put($e.id, $episodeObject)
+        }
     }
     catch
     {
         Write-Warning "Could not access details for $s"
+        $_
     }
 }
