@@ -18,9 +18,15 @@ $series = [ordered]@{
     "Revolution" = 258823
 }
 
-$Data = foreach ($s in $series.keys.GetEnumerator())
+foreach ($s in $series.keys.GetEnumerator())
 {
-    $episodes = irm "$mirrorpath/api/$apikey/series/$($series[$s])/all/" | select -expandproperty Data
-    $episodes.Episode | select @{l="Series";e={$s}}, @{l="FirstAired";e={Get-Date $_.FirstAired}}, SeasonNumber, EpisodeName | Write-Output
+    try
+    {
+        $episodes = irm "$mirrorpath/api/$apikey/series/$($series[$s])/all/$($english.abbreviation).xml" | select -expandproperty Data
+        $episodes.Episode | select @{l="Series";e={$s}}, @{l="FirstAired";e={Get-Date $_.FirstAired}}, SeasonNumber, EpisodeName | Write-Output
+    }
+    catch
+    {
+        Write-Warning "Could not access details for $s"
+    }
 }
-
