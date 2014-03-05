@@ -1,4 +1,4 @@
-# http://www.orthogonal.com.au/computers/simpledb/
+# https://bitbucket.org/gfkeogh/simpledb/wiki/Home
 Add-Type -Path C:\Scripts\Modules\SimpleDb\SimpleDb.Esent.dll
 
 $episodeClass = @"
@@ -44,41 +44,57 @@ $series = [ordered]@{
     "Revolution" = 258823
 }
 
-$db = New-Object SimpleDb.SimpleDatabase('C:\temp\simpledb')
+$db = New-Object SimpleDb.SimpleDatabase
+$db.Open('C:\temp\simpledb')
 
-foreach ($s in $series.keys.GetEnumerator())
-{
-    try
+try
     {
-        $episodes = irm "$mirrorpath/api/$apikey/series/$($series[$s])/all/$($english.abbreviation).xml" | select -expandproperty Data
-        #$episodes.Episode | select @{l="Series";e={$s}}, @{l="FirstAired";e={Get-Date $_.FirstAired}}, SeasonNumber, EpisodeName | Write-Output
-        foreach ($e in $episodes.Episode)
-        {
-            $episodeObject = New-Object Episode
-            $episodeObject.Series = $s
-            $episodeObject.Id = $e.id
-            $episodeObject.SeriesId = $series[$s]
-            try {$episodeObject.FirstAired = Get-Date $e.FirstAired} catch {$null}
-            $episodeObject.SeasonNumber = $e.SeasonNumber
-            $episodeObject.EpisodeName = $e.EpisodeName
-            $episodeObject.PreviousTime = $currenttime.Items.Time
 
-            $episodeObject | Write-Output
-            # True if the key already existed. False if a new key was inserted.
-            $newKey = $db.Put($e.id, $episodeObject)
+    foreach ($s in $series.keys.GetEnumerator())
+    {
+        try
+        {
+            $episodes = irm "$mirrorpath/api/$apikey/series/$($series[$s])/all/$($english.abbreviation).xml" | select -expandproperty Data
+            #$episodes.Episode | select @{l="Series";e={$s}}, @{l="FirstAired";e={Get-Date $_.FirstAired}}, SeasonNumber, EpisodeName | Write-Output
+            foreach ($e in $episodes.Episode)
+            {
+                $episodeObject = New-Object Episode
+                $episodeObject.Series = $s
+                $episodeObject.Id = $e.id
+                $episodeObject.SeriesId = $series[$s]
+                try {$episodeObject.FirstAired = Get-Date $e.FirstAired} catch {$null}
+                $episodeObject.SeasonNumber = $e.SeasonNumber
+                $episodeObject.EpisodeName = $e.EpisodeName
+                $episodeObject.PreviousTime = $currenttime.Items.Time
+
+                $episodeObject | Write-Output
+                # True if the key already existed. False if a new key was inserted.
+                $newKey = $db.Put($e.id, $episodeObject)
+            }
+        }
+        catch
+        {
+            Write-Warning "Could not access details for $s"
+            $_
         }
     }
-    catch
-    {
-        Write-Warning "Could not access details for $s"
-        $_
-    }
+
+    # Get by Episode ID
+    # .\Invoke-GenericMethod.ps1 $db Get Episode 4808568
+
+    # Gets all objects that contain an Id field
+    # .\Invoke-GenericMethod.ps1 $db ListByName Episode Id
+
+    #$method = $db.GetType().GetMethods() | ? Name -eq ListByNameFiltered
+    #$genericMethod = $method.MakeGenericMethod(@([Episode], [predicate[int]]))
+    #$genericMethod.Invoke("Id", ([predicate[int]]{ $id -eq 4808568 }))
+
 }
-
-# Get by Episode ID
-# .\Invoke-GenericMethod.ps1 $db Get Episode 4808568
-
-# Gets all objects that contain an Id field
-#. C:\Scripts\Invoke-GenericMethod.ps1 $db ListByName Episode Id
-
-$db.Dispose()
+catch
+{
+    $_
+}
+finally
+{
+    $db.Dispose()
+}
