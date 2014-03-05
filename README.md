@@ -27,3 +27,4 @@ You might find one of these snippets a useful starting point for some problem yo
 * **Notes-S3Sync.ps1**: Messing with AWSPowerShell.
 * **Notes-SubnetCalculator.ps1**: Not very useful Subnet calculator.
 * **OneTimeSecret.psm1**: OneTimeSecret.com create API.
+* **thetvdbapiconsumer**: Working with TheTVDB.com XML API and using SimpleDB, an [ESENT](http://en.wikipedia.org/wiki/ESENT "Extensible Storage Engine") based datastore.
