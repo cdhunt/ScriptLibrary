@@ -1,6 +1,7 @@
 # https://bitbucket.org/gfkeogh/simpledb/wiki/Home
 Add-Type -Path C:\Scripts\Modules\SimpleDb\SimpleDb.Esent.dll
 
+# Data Model
 $episodeClass = @"
 using System;
 public class Episode
@@ -80,14 +81,20 @@ try
     }
 
     # Get by Episode ID
-    # .\Invoke-GenericMethod.ps1 $db Get Episode 4808568
+    # $idById =  $db.GetType().GetMethod("Get").MakeGenericMethod([Episode])
+    # $idById.invoke($db, 4808568)
 
-    # Gets all objects that contain an Id field
-    # .\Invoke-GenericMethod.ps1 $db ListByName Episode Id
+    # Gets all objects that contain an SeasonNumber field
+    # $fieldSearch =  $db.GetType().GetMethod("ListByName").MakeGenericMethod([Episode])
+    # $fieldSearch.invoke($db, "SeasonNumber")
 
-    #$method = $db.GetType().GetMethods() | ? Name -eq ListByNameFiltered
-    #$genericMethod = $method.MakeGenericMethod(@([Episode], [predicate[int]]))
-    #$genericMethod.Invoke("Id", ([predicate[int]]{ $id -eq 4808568 }))
+    # Search by Episode ID, same as above basically
+    # $idSearch = $db.GetType().GetMethod("ListByNameFiltered").MakeGenericMethod([Episode],[int])
+    # $idSearch.Invoke($db, @("Id", [predicate[int]]{ param([int]$num); $num -eq 4808568 }))
+
+    # Search by Series Name
+    # $seriesSearch = $db.GetType().GetMethod("ListByNameFiltered").MakeGenericMethod([Episode],[string])
+    # $seriesSearch.Invoke($db, @("Series", [predicate[string]]{ param([string]$str); $str -eq 'Revolution' }))
 
 }
 catch
