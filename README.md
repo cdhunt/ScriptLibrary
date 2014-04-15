@@ -19,6 +19,7 @@ You might find one of these snippets a useful starting point for some problem yo
 * **Create-Database.ps1**: Create a new SQL DB using SMO.
 * **Example-MongoDb.ps1**: Working with BSOD documents in MongoDB with the CSharpDriver.
 * **Functions-SSL.ps1**: Wrapper for OpenSSL to generate new SSL certificates.
+* **Humanizer.psm1**: Some functions to quickly enable [Humanizer](http://humanizr.net/ "Humanizer") functionality in Powershell.
 * **Invoke-GenericMethod.ps1**: Invoke a generic method on a non-generic type.
 * **New-GenericObject.ps1**: Creates an object of a generic type.
 * **Note-WinSCP.ps1**: Working with WinSCP API.
